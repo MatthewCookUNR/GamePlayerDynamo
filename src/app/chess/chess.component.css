@@ -1,0 +1,309 @@
+
+/*Sizes for base screen size (DESKTOP)*/
+@media only screen and (min-width: 1300px) {
+
+  #mainContent {
+    width: 1200px;
+    margin: auto;
+  }
+
+  .flexContainer {
+    height: 38em;
+  }
+  
+  table, .sidebar {
+    height: 100%;
+  }
+
+  .chessPiece {
+    font-size: 52px;
+    line-height: 40px;
+  }
+
+  .blackSquare, .whiteSquare {
+    border-width: 3px;
+  }
+
+  .headFootbar {
+    height: 8em;
+  }
+
+  #headbar {
+    border-top-right-radius: 100px;
+    border-top-left-radius: 100px;
+  }
+
+  #footbar {
+    border-bottom-left-radius: 100px;
+    border-bottom-right-radius: 100px;
+  }
+
+  #headbar, #footbar, #leftSidebar, #rightSidebar {
+    border-width: 10px;
+  }
+
+  #chessBoard {
+    width: 50%;
+  }
+
+  .currentGameStatus {
+    padding-top: 45px;
+    padding-bottom: 45px;
+    margin: 0px;
+    font-size: 2em;
+  }
+
+  #restartBtn {
+    font-size: 2em;
+    margin-top: 30px;
+  }
+
+  .deadPiece {
+    font-size: 52px;
+    display: inline-block;
+  }
+
+  #restartBtn{
+    margin-top: 10px;
+    margin-left: 20px;
+    border-radius: 15px;
+    border-width: 1px;
+  }
+
+  .piecesDeadStatusContainer {
+    width: 50%;
+  }
+
+  .kingStatusTxt {
+    font-size: 1.25em;
+  }
+
+  h2 {
+    font-size: 1.75em;
+  }
+
+  #winningPlayer {
+    font-size: 1.3em;
+  }
+  
+}
+
+/*Sizes for small screen size (DESKTOP)*/
+@media only screen and (max-width: 1300px) {
+
+  #mainContent {
+    width: 900px;
+    margin: auto;
+  }
+
+  .flexContainer {
+    height: 35em;
+  }
+
+  .blackSquare, .whiteSquare {
+    border-width: 2.5px;
+  }
+  
+  table, .sidebar {
+    height: 100%;
+  }
+  
+  .headFootbar {
+    height: 8em;
+  }
+
+  .chessPiece {
+    font-size: 45px;
+    line-height: 40px;
+  }
+
+  #chessBoard {
+    width: 70%;
+  }
+
+  .sidebarText {
+    font-size: 0.8em;
+  }
+
+  #headbar {
+    border-top-right-radius: 100px;
+    border-top-left-radius: 100px;
+  }
+
+  #footbar {
+    border-bottom-left-radius: 100px;
+    border-bottom-right-radius: 100px;
+  }
+
+  #headbar, #footbar, #leftSidebar, #rightSidebar {
+    border-width: 8px;
+  }
+
+  .currentGameStatus {
+    padding-top: 50px;
+    padding-bottom: 41px;
+    margin: 0px;
+    font-size: 2em;
+  }
+
+  #restartBtn{
+    font-size: 1.5em;
+    margin-top: 10px;
+    margin-left: 20px;
+    border-radius: 15px;
+    border-width: 1px;
+  }
+
+  .deadPiece {
+    font-size: 45px;
+    display: inline-block;
+  }
+
+  .piecesDeadStatusContainer {
+    width: 70%;
+  }
+
+  #winningPlayer {
+    font-size: 1.3em;
+  }
+
+}
+
+/*FLEX CONTAINER FOR CHESS AND SIDEBARS*/
+.flexContainer {
+  display: flex;
+  margin: center;
+  align-items: center;
+  justify-content: center;
+}
+
+/*CHESS TABLE*/
+
+table {
+  text-align: center;
+  border: 10px;
+  border-style: solid;
+  border-color: #B22222;
+  border-collapse: collapse;
+}
+
+.blackSquare, .whiteSquare {
+  width: 12.5%;
+  height: 12.5%;
+  border-collapse: collapse;
+}
+
+.whiteSquare {
+  background-color: #F8F8FF;
+}
+
+.blackSquare {
+  background-color: #808080;
+}
+
+/*SIDEBAR*/
+
+.sidebar {
+  background-color: #FFB6C1;
+  width: 25%;
+}
+
+.sidebarText {
+  text-align: center;
+}
+
+.sidebar ul li {
+  list-style: none;
+}
+
+#leftSidebar {
+  border-left-style: solid;
+}
+
+#rightSidebar {
+  border-right-style: solid;
+}
+
+.piecesDeadStatusContainer {
+  text-align: center;
+  margin: auto;
+}
+
+.deadWhiteContainer {
+  background-color: #F8F8FF;
+  border-radius: 40px;
+  color: #a3a3a3;
+}
+
+.deadBlackContainer {
+  background-color: #F8F8FF;
+  border-radius: 40px;
+}
+
+.deadPiece {
+  text-align: center;
+  margin: 0px;
+  color: #a3a3a3;
+}
+
+/*FOOTBAR/HEADBAR*/
+.headFootbar {
+  background-color: #FFB6C1;
+}
+
+#headbar {
+  border-right-style: solid;
+  border-left-style: solid;
+  border-top-style: solid;
+  text-align: center;
+}
+
+#footbar {
+  border-bottom-style: solid;
+  border-right-style: solid;
+  border-left-style: solid;
+  position: relative;
+}
+
+#headbar, #footbar, #leftSidebar, #rightSidebar {
+  border-color: #c1ffb6;
+}
+
+#gameStatusStatic {
+  display: inline-block;
+  font-size: 24px;
+}
+
+.footbarContent {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  padding-right: 18%;
+}
+
+/*OTHER CSS*/
+
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.currentGameStatus, #gameStatusStatic {
+  font-weight: bold;
+}
+
+#currentPlayer, #gameStatus, #winningPlayer {
+  font-weight: normal;
+}
+
+#currentWinningStatus {
+  padding-top: 38px;
+  padding-bottom: 38px;
+}
+
+#restartBtn {
+  background-color: #c1ffb6;
+  cursor: pointer;
+  height: 50%;
+  position: absolute;
+  outline: none;
+}

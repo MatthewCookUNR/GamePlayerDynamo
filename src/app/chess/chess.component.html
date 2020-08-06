@@ -1,0 +1,132 @@
+<body>
+  <div id="mainContent">
+    <!--Header Bar Container-->
+    <div id="headbar" class = "headFootbar">
+      <p id="currentPlayerStatus" [hidden]="gameOver" class="currentGameStatus">Current Player: <span id="currentPlayer"></span></p>
+      <p id="currentWinningStatus" [hidden]="!gameOver" class="currentGameStatus">Checkmate! <span id="winningPlayer"></span> Wins!</p>
+    </div>
+    <!--Chessboard Container-->
+    <div class="flexContainer">
+      <!--Left SideBar Container-->
+      <div id="leftSidebar" class="sidebar">
+        <div class="sidebarText">
+          <h2>White Player ♔</h2>
+          <p class="kingStatusTxt">King Status: <span id="whiteKingStatus">Safe</span></p>
+        </div>
+        <div class="piecesDeadStatusContainer deadWhiteContainer">
+          <p class="deadPiece"><span id="whiteQueen1">♕</span></p>
+          <p class="deadPiece"><span id="whiteRook1">♖</span><span id="whiteRook2">♖</span></p>
+          <p class="deadPiece"><span id="whiteBishop1">♗</span><span id="whiteBishop2">♗</span></p>
+          <p class="deadPiece"><span id="whiteKnight1">♘</span><span id="whiteKnight2">♘</span></p>
+          <p class="deadPiece"><span id="whitePawn">♙</span><span id="whitePawnNumber">x0</span></p>
+        </div>
+      </div>
+      <!-- Chessboard -->
+      <table id="chessBoard">
+        <tbody>
+          <tr>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow1Col1"><span class="chessPiece">♖</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow1Col2"><span class="chessPiece">♘</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow1Col3"><span class="chessPiece">♗</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow1Col4"><span class="chessPiece">♕</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow1Col5"><span class="chessPiece">♔</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow1Col6"><span class="chessPiece">♗</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow1Col7"><span class="chessPiece">♘</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow1Col8"><span class="chessPiece">♖</span></td>
+          </tr>
+          <tr>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow2Col1"><span class="chessPiece">♙</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow2Col2"><span class="chessPiece">♙</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow2Col3"><span class="chessPiece">♙</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow2Col4"><span class="chessPiece">♙</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow2Col5"><span class="chessPiece">♙</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow2Col6"><span class="chessPiece">♙</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow2Col7"><span class="chessPiece">♙</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow2Col8"><span class="chessPiece">♙</span></td>
+          </tr>
+          <tr>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow3Col1"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow3Col2"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow3Col3"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow3Col4"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow3Col5"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow3Col6"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow3Col7"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow3Col8"></td>
+          </tr>
+          <tr>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow4Col1"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow4Col2"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow4Col3"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow4Col4"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow4Col5"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow4Col6"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow4Col7"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow4Col8"></td>
+          </tr>
+          <tr>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow5Col1"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow5Col2"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow5Col3"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow5Col4"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow5Col5"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow5Col6"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow5Col7"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow5Col8"></td>
+          </tr>
+          <tr>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow6Col1"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow6Col2"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow6Col3"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow6Col4"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow6Col5"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow6Col6"></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow6Col7"></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow6Col8"></td>
+          </tr>
+          <tr>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow7Col1"><span class="chessPiece">♟︎</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow7Col2"><span class="chessPiece">♟︎</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow7Col3"><span class="chessPiece">♟︎</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow7Col4"><span class="chessPiece">♟︎</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow7Col5"><span class="chessPiece">♟︎</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow7Col6"><span class="chessPiece">♟︎</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow7Col7"><span class="chessPiece">♟︎</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow7Col8"><span class="chessPiece">♟︎</span></td>
+          </tr>
+          <tr>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow8Col1"><span class="chessPiece">♜</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow8Col2"><span class="chessPiece">♞</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow8Col3"><span class="chessPiece">♝</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow8Col4"><span class="chessPiece">♛</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow8Col5"><span class="chessPiece">♚</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow8Col6"><span class="chessPiece">♝</span></td>
+            <td class="blackSquare" (click)="handleSqrClick($event)" id="sqrRow8Col7"><span class="chessPiece">♞</span></td>
+            <td class="whiteSquare" (click)="handleSqrClick($event)" id="sqrRow8Col8"><span class="chessPiece">♜</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <!--Right Sidebar Container-->
+      <div id="rightSidebar" class="sidebar">
+        <div class="sidebarText">
+          <h2>Black Player ♚</h2>
+          <p class="kingStatusTxt">King Status: <span id="blackKingStatus">Safe</span></p>
+        </div>
+        <div class="piecesDeadStatusContainer deadBlackContainer">
+          <p class="deadPiece"><span id="blackQueen1">♛</span></p>
+          <p class="deadPiece"><span id="blackRook1">♜</span><span id="blackRook2">♜</span></p>
+          <p class="deadPiece"><span id="blackBishop1">♝</span><span id="blackBishop2">♝</span></p>
+          <p class="deadPiece"><span id="blackKnight1">♞</span><span id="blackKnight2">♞</span></p>
+          <p class="deadPiece"><span id="blackPawn">♟︎</span><span id="blackPawnNumber">x0</span></p>
+        </div>
+      </div>
+    </div>
+    <div id = "footbar" class = "headFootbar">
+      <!--Will have this switch to "Play Again?" when game over-->
+      <div class="footbarContent">
+        <p id="gameStatusStatic">Game Status: <span id="gameStatus">In Progress</span></p>
+        <button (click)="restartGame()" id="restartBtn">Reset Game</button>
+      </div>
+    </div>
+  </div>
+</body>
