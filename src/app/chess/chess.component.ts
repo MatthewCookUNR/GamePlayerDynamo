@@ -51,10 +51,6 @@ export class ChessComponent implements OnInit {
 
   ngOnInit(): void 
   {
-
-  }
-  
-  ngAfterViewInit(): void {
     let gameId = this.getCookie('chessId');
 
     if(gameId) {
@@ -63,7 +59,11 @@ export class ChessComponent implements OnInit {
     else {
       this.newGame();
       this.newGameDB();
+      this.loadPiecePostionsUI();
     }
+  }
+  
+  ngAfterViewInit(): void {
 
   }
 
@@ -119,6 +119,7 @@ export class ChessComponent implements OnInit {
         this.destroyChessPiece(squareId, row, col);
       }
         this.moveChessPiece(squareId, row, col);
+        this.saveGame();
     }
   }
 
@@ -611,6 +612,8 @@ this.possibleWhiteMovementsBoard =
   loadGameUI(): void {
     this.cleanBoardUI()
     this.loadPiecePostionsUI();
+    this.loadGameKingStatusesUI();
+    this.loadPieceGraveyardsUI();
   }
 
   //Function loads all pieces into the correct locations on the chess board
@@ -624,8 +627,116 @@ this.possibleWhiteMovementsBoard =
     }
   }
 
-  setCurrentPlayer(color: string): void {
+  //resets Game Statuses on the Screen to original state
+  loadGameKingStatusesUI(): void {
+    if((this.myChessPieces[this.myChessPieces.length-2] as King).isCheckMate) {
+      document.getElementById('whiteKingStatus').innerHTML = "Checkmate";
+    }
+    else if(this.whiteKingCheck) {
+      document.getElementById('whiteKingStatus').innerHTML = "Check";
+    }
+    else {
+      document.getElementById('whiteKingStatus').innerHTML = "Safe";
+    }
+  
+    if((this.myChessPieces[this.myChessPieces.length-1] as King).isCheckMate) {
+      document.getElementById('blackKingStatus').innerHTML = "Checkmate";
+    }
+    else if(this.blackKingCheck) {
+      document.getElementById('blackKingStatus').innerHTML = "Check";
+    }
+    else {
+      document.getElementById('blackKingStatus').innerHTML = "Safe";
+    }
+  }
 
+  //Cleans Piece Graveyard and resets it to orignal state
+  loadPieceGraveyardsUI(): void {
+    
+    //WHITE PIECES
+    //Pawn
+    if(this.numWhitePiecesDeadList[0] > 0) {
+      document.getElementById('whitePawn').style.color="black";
+      document.getElementById('whitePawnNumber').style.color="black"
+      document.getElementById('whitePawnNumber').innerHTML= "x" + this.numWhitePiecesDeadList[0];
+    }
+    //Rook
+    if(this.numWhitePiecesDeadList[1] != 0) {
+      if(this.numWhitePiecesDeadList[1] === 1) {
+        document.getElementById('whiteRook2').style.color="black";
+      }
+      else {
+        document.getElementById('whiteRook1').style.color="black";
+        document.getElementById('whiteRook2').style.color="black";
+      }
+    }
+    //Bishop
+    if(this.numWhitePiecesDeadList[2] != 0) {
+      if(this.numWhitePiecesDeadList[2] === 1) {
+        document.getElementById('whiteBishop2').style.color="black";
+      }
+      else {
+        document.getElementById('whiteBishop1').style.color="black";
+        document.getElementById('whiteBishop2').style.color="black";
+      }
+    }
+    //Knight
+    if(this.numWhitePiecesDeadList[3] != 0) {
+      if(this.numWhitePiecesDeadList[3] === 1) {
+        document.getElementById('whiteKnight2').style.color="black";
+      }
+      else {
+        document.getElementById('whiteKnight1').style.color="black";
+        document.getElementById('whiteKnight2').style.color="black";
+      }
+    }
+    //Queen
+    if(this.numWhitePiecesDeadList[3] != 0) {
+          document.getElementById('whiteQueen1').style.color="black";
+    }
+
+
+    //BLACK PIECES
+    //Pawn
+    if(this.numBlackPiecesDeadList[0] > 0) {
+      document.getElementById('blackPawn').style.color="black";
+      document.getElementById('blackPawnNumber').style.color="black"
+      document.getElementById('blackPawnNumber').innerHTML= "x" + this.numBlackPiecesDeadList[0];
+    }
+    //Rook
+    if(this.numBlackPiecesDeadList[1] != 0) {
+      if(this.numBlackPiecesDeadList[1] === 1) {
+        document.getElementById('blackRook2').style.color="black";
+      }
+      else {
+        document.getElementById('blackRook1').style.color="black";
+        document.getElementById('blackRook2').style.color="black";
+      }
+    }
+    //Bishop
+    if(this.numBlackPiecesDeadList[2] != 0) {
+      if(this.numBlackPiecesDeadList[2] === 1) {
+        document.getElementById('blackBishop2').style.color="black";
+      }
+      else {
+        document.getElementById('blackBishop1').style.color="black";
+        document.getElementById('blackBishop2').style.color="black";
+      }
+    }
+    //Knight
+    if(this.numBlackPiecesDeadList[3] != 0) {
+      if(this.numBlackPiecesDeadList[3] === 1) {
+        document.getElementById('blackKnight2').style.color="black";
+      }
+      else {
+        document.getElementById('blackKnight1').style.color="black";
+        document.getElementById('blackKnight2').style.color="black";
+      }
+    }
+    //Queen
+    if(this.numBlackPiecesDeadList[3] != 0) {
+          document.getElementById('blackQueen1').style.color="black";
+    }
   }
 
   //Cleans board so that pieces can be placed from database
@@ -930,10 +1041,45 @@ this.possibleWhiteMovementsBoard =
 
   }
 
-  insertDataDB = async function (params: any) {
+  saveGame(): void {
+    let chessId: string = this.getCookie('chessId')
+    if(!chessId) {
+      return;
+    }
+    this.setCookie('chessId', chessId, 7);
+    
+    let pieceDataOut = this.getPieceRowCols(); 
+
+    //Data needed for DB Query
+    let params = {
+      Item : {
+      "chessDataId" : chessId,
+      "currentPlayerColorStr" : this.currentPlayerColorStr,
+      "clickedPieceId": this.clickedPieceId,
+      "clickedPieceRow": this.clickedPieceRow,
+      "clickedPieceCol": this.clickedPieceCol,
+      "clickedPieceIndex": this.clickedPieceIndex,
+      "blackKingCheck": false,
+      "whiteKingCheck": false,
+      "gameOver": false,
+      "myChessBoard":  JSON.stringify(this.myChessBoard),
+      "possibleWhiteMovementsBoard": JSON.stringify(this.possibleWhiteMovementsBoard),
+      "possibleBlackMovementsBoard": JSON.stringify(this.possibleBlackMovementsBoard),
+      "myChessPieces": JSON.stringify(pieceDataOut),
+      "numWhitePiecesDeadList": JSON.stringify(this.numWhitePiecesDeadList),
+      "numBlackPiecesDeadList": JSON.stringify(this.numBlackPiecesDeadList),
+      },
+      TableName : 'chessData'
+    };
+    console.log(params);
+
+    console.log(this.insertDataDB(params));
+  }
+
+  insertDataDB =  function (params: any) {
     let data: any;
     try {
-      data = await this.docClient.put(params).promise();
+      data =  this.docClient.put(params).promise();
     }
     catch(err) {
       console.log("Error inserting data in DynamoDB");
@@ -942,10 +1088,10 @@ this.possibleWhiteMovementsBoard =
     return data;
   }
 
-  getDataDB = async function(params: any) {
+  getDataDB =  function(params: any) {
     let data: any;
     try {
-      data = await this.docClient.get(params).promise();
+      data =  this.docClient.get(params).promise();
     }
     catch(err) {
       console.log("Error getting data in DynamoDB");
