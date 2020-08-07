@@ -40,15 +40,13 @@ export class ChessComponent implements OnInit {
     //this.clickedPieceIndex = -1;
 
     // provide your access key and secret access key as obtained in the previous step
-    AWS.config.credentials = new AWS.Credentials('XXXXXXXXX', 'XXXXXXXXX', null);
+    AWS.config.credentials = new AWS.Credentials('AKIASJ22AXRWM4RX7O4P', 'zwaq3gu2ljUa5e1k3GW6GCyiVXU3fovnT+1z4U9b', null);
     AWS.config.update({
     region: 'us-west-2'
     });
 
     this.dynamoDB = new AWS.DynamoDB();
     this.docClient = new AWS.DynamoDB.DocumentClient();
-    //this.testInsertData();
-    //this.testGetData();
   }
 
   ngOnInit(): void 
@@ -57,9 +55,14 @@ export class ChessComponent implements OnInit {
   }
   
   ngAfterViewInit(): void {
-    //this.newGame(); 
-    //this.newGameDB();
-    this.loadGame();
+    let gameId = this.getCookie('chessId');
+
+    if(gameId) {
+      this.loadGame();
+    }
+    else {
+      this.newGameDB();
+    }
 
   }
 
@@ -182,35 +185,35 @@ export class ChessComponent implements OnInit {
 
     //Creates Pawns
     for(let i = 0; i < 8; i++) {
-      this.myChessPieces[i] = new Pawn(1, i, false);
-      this.myChessPieces[i+8] = new Pawn(6, i, true);
+      this.myChessPieces[i] = new Pawn(1, i, false, '♙');
+      this.myChessPieces[i+8] = new Pawn(6, i, true, '♟︎');
     }
 
     //Create Rooks
-    this.myChessPieces[16] = new Rook(0, 0, false);
-    this.myChessPieces[17] = new Rook(0, 7, false);
-    this.myChessPieces[18] = new Rook(7, 0, true);
-    this.myChessPieces[19] = new Rook(7, 7, true);
+    this.myChessPieces[16] = new Rook(0, 0, false, '♖');
+    this.myChessPieces[17] = new Rook(0, 7, false, '♖');
+    this.myChessPieces[18] = new Rook(7, 0, true, '♜');
+    this.myChessPieces[19] = new Rook(7, 7, true, '♜');
 
     //Create Knights
-    this.myChessPieces[20] = new Knight(0, 1, false);
-    this.myChessPieces[21] = new Knight(0, 6, false);
-    this.myChessPieces[22] = new Knight(7, 1, true);
-    this.myChessPieces[23] = new Knight(7, 6, true);
+    this.myChessPieces[20] = new Knight(0, 1, false, '♘');
+    this.myChessPieces[21] = new Knight(0, 6, false, '♘');
+    this.myChessPieces[22] = new Knight(7, 1, true, '♞');
+    this.myChessPieces[23] = new Knight(7, 6, true, '♞');
 
     //Create Knights
-    this.myChessPieces[24] = new Bishop(0, 2, false);
-    this.myChessPieces[25] = new Bishop(0, 5, false);
-    this.myChessPieces[26] = new Bishop(7, 2, true);
-    this.myChessPieces[27] = new Bishop(7, 5, true);
+    this.myChessPieces[24] = new Bishop(0, 2, false, '♗');
+    this.myChessPieces[25] = new Bishop(0, 5, false, '♗');
+    this.myChessPieces[26] = new Bishop(7, 2, true, '♝');
+    this.myChessPieces[27] = new Bishop(7, 5, true, '♝');
 
     //Create Queens
-    this.myChessPieces[28] = new Queen(0, 3, false);
-    this.myChessPieces[29] = new Queen(7, 3, true);
+    this.myChessPieces[28] = new Queen(0, 3, false, '♕');
+    this.myChessPieces[29] = new Queen(7, 3, true, '♛');
 
     //Create Kings
-    this.myChessPieces[this.myChessPieces.length-2] = new King(0, 4, false);
-    this.myChessPieces[this.myChessPieces.length-1] = new King(7, 4, true);
+    this.myChessPieces[this.myChessPieces.length-2] = new King(0, 4, false, '♔');
+    this.myChessPieces[this.myChessPieces.length-1] = new King(7, 4, true, '♚');
 
   }
 
@@ -477,13 +480,17 @@ this.possibleWhiteMovementsBoard =
     this.clickedPieceIndex = -1;
   }
 
+  //Load Game from DynamoDB and initiate update front-end
+  //to match data
   loadGame(): void {
     let chessId: string = this.getCookie('chessId');
+    console.log(chessId);
     if(!chessId) {
       console.log("You have no game to load");
       return;
     }
     
+    //Data needed for DB Query
     let params = {
       TableName: "chessData",
       Key: {
@@ -492,11 +499,13 @@ this.possibleWhiteMovementsBoard =
     }
     let data = this.getDataDB(params)
     console.log(data);
+    
+    //Data retrieved succesfully
     data.then((res) => {
-      this.myChessBoard = res.Item.myChessBoard;
-      this.possibleWhiteMovementsBoard = res.Item.possibleWhiteMovementsBoard;
-      this.possibleBlackMovementsBoard = res.Item.possibleBlackMovementsBoard;
-      this.myChessPieces = res.Item.myChessPieces;
+      this.myChessBoard = JSON.parse(res.Item.myChessBoard);
+      this.possibleWhiteMovementsBoard = JSON.parse(res.Item.possibleWhiteMovementsBoard);
+      this.possibleBlackMovementsBoard = JSON.parse(res.Item.possibleBlackMovementsBoard);
+      this.myChessPieces = JSON.parse(res.Item.myChessPieces);
       this.clickedPieceIndex = res.Item.clickedPieceIndex;
       this.clickedPieceId= res.Item.clickedPieceId;;
       this.clickedPieceRow= res.Item.clickedPieceRow;;
@@ -504,15 +513,17 @@ this.possibleWhiteMovementsBoard =
       this.currentPlayerColorStr= res.Item.currentPlayerColorStr;;
       this.blackKingCheck = res.Item.blackKingCheck;
       this.whiteKingCheck = res.Item.blackKingCheck;
-      this.numWhitePiecesDeadList = res.Item.blackKingCheck;
-      this.numBlackPiecesDeadList = res.Item.blackKingCheck;
+      this.numWhitePiecesDeadList = JSON.parse(res.Item.numWhitePiecesDeadList);
+      this.numBlackPiecesDeadList = JSON.parse(res.Item.numBlackPiecesDeadList);
       this.gameOver = res.Item.gameOver
       console.log(this);
-  });
-  data.catch((err) => {
-      // This is never called
-      console.log("Error");
-  });
+      this.loadGameUI();
+    });
+    //If issue retrieving data
+    data.catch((err) => {
+        // This is never called
+        console.log(err);
+    });
 
   }
 
@@ -562,33 +573,61 @@ this.possibleWhiteMovementsBoard =
     document.getElementById('blackKingStatus').innerHTML = "Safe";
   }
 }
+
+  //Takes care of updating UI to match backend
+  loadGameUI(): void {
+    this.cleanBoardUI()
+    this.loadPiecePostionsUI();
+  }
+
+  //Function loads all pieces into the correct locations on the chess board
+  loadPiecePostionsUI(): void {
+    let destStr: string;
+    for(let i = 0; i < this.myChessPieces.length; i++) {
+      if(this.myChessPieces[i].row != -1 || this.myChessPieces[i].column != -1) {
+        destStr = "sqrRow" + (this.myChessPieces[i].row+1) + "Col" + (this.myChessPieces[i].column+1)
+        this.placePieceUI(destStr, this.myChessPieces[i].strRep); 
+      }
+    }
+  }
+
+  //Cleans board so that pieces can be placed from database
+  cleanBoardUI(): void {
+    //Clear Remaining spaces
+    for(let i = 1; i < 9; i++) {
+      for(let j = 1; j < 9; j++) {
+        document.getElementById("sqrRow" + j + "Col" + i).innerHTML ='';
+      }
+    }
+  }
+
   //Resets all pieces in chess game to original state
   resetGamePiecesUI(): void {
 
     //Create Special Pieces
-    this.movePieceUIOnly("sqrRow1Col1", '♖');
-    this.movePieceUIOnly("sqrRow1Col2", '♘');
-    this.movePieceUIOnly("sqrRow1Col3", '♗');
-    this.movePieceUIOnly("sqrRow1Col4", '♕');
-    this.movePieceUIOnly("sqrRow1Col5", '♔');
-    this.movePieceUIOnly("sqrRow1Col6", '♗');
-    this.movePieceUIOnly("sqrRow1Col7", '♘');
-    this.movePieceUIOnly("sqrRow1Col8", '♖');
+    this.placePieceUI("sqrRow1Col1", '♖');
+    this.placePieceUI("sqrRow1Col2", '♘');
+    this.placePieceUI("sqrRow1Col3", '♗');
+    this.placePieceUI("sqrRow1Col4", '♕');
+    this.placePieceUI("sqrRow1Col5", '♔');
+    this.placePieceUI("sqrRow1Col6", '♗');
+    this.placePieceUI("sqrRow1Col7", '♘');
+    this.placePieceUI("sqrRow1Col8", '♖');
 
-    this.movePieceUIOnly("sqrRow8Col1", '♜');
-    this.movePieceUIOnly("sqrRow8Col2", '♞');
-    this.movePieceUIOnly("sqrRow8Col3", '♝');
-    this.movePieceUIOnly("sqrRow8Col4", '♛');
-    this.movePieceUIOnly("sqrRow8Col5", '♚');
-    this.movePieceUIOnly("sqrRow8Col6", '♝');
-    this.movePieceUIOnly("sqrRow8Col7", '♞');
-    this.movePieceUIOnly("sqrRow8Col8", '♜');
+    this.placePieceUI("sqrRow8Col1", '♜');
+    this.placePieceUI("sqrRow8Col2", '♞');
+    this.placePieceUI("sqrRow8Col3", '♝');
+    this.placePieceUI("sqrRow8Col4", '♛');
+    this.placePieceUI("sqrRow8Col5", '♚');
+    this.placePieceUI("sqrRow8Col6", '♝');
+    this.placePieceUI("sqrRow8Col7", '♞');
+    this.placePieceUI("sqrRow8Col8", '♜');
 
 
     //Create Pawns
     for(let i = 1; i < 9; i++) {
-      this.movePieceUIOnly("sqrRow2Col" + i, '♙');
-      this.movePieceUIOnly("sqrRow7Col" + i, '♟︎');
+      this.placePieceUI("sqrRow2Col" + i, '♙');
+      this.placePieceUI("sqrRow7Col" + i, '♟︎');
     }
 
     //Clear Remaining spaces
@@ -602,7 +641,7 @@ this.possibleWhiteMovementsBoard =
 
   //Moves piece without touching array of board
   //Used for reseting game only
-  movePieceUIOnly(sqrId: string, pieceStr: string) {
+  placePieceUI(sqrId: string, pieceStr: string) {
     let sqrObj = document.getElementById(sqrId);
     sqrObj.innerText="";
     let childSpan = document.createElement("SPAN");
@@ -779,6 +818,7 @@ this.possibleWhiteMovementsBoard =
     document.getElementById("gameStatus").innerHTML = "Game Over";
   }
 
+
   /*
   *
   * Cookie Functions
@@ -826,6 +866,7 @@ this.possibleWhiteMovementsBoard =
 
     let stringPieces = JSON.stringify(this.myChessPieces)
 
+    //Data needed for DB Query
     let params = {
       Item : {
       "chessDataId" : chessId,
@@ -851,30 +892,6 @@ this.possibleWhiteMovementsBoard =
     console.log(this.insertDataDB(params));
 
   }
-  
-  testInsertData(): void {
-    let params = {
-      Item : {
-      "userId" : uuid(),
-      "firstName" : "Matt",
-      "lastName": "Cook",
-      },
-      TableName : 'users'
-    };
-
-    console.log(this.insertDataDB(params));
-  }
-
-  testGetData(): void {
-    console.log(this.getCookie('chessId'));
-    let params = {
-      TableName: "chessData",
-      Key: {
-          chessDataId: this.getCookie('chessId'),
-      }
-    }
-    console.log(this.getDataDB(params))
-  }
 
   insertDataDB = async function (params: any) {
     let data: any;
@@ -899,4 +916,36 @@ this.possibleWhiteMovementsBoard =
     }
     return data;
   }
+
+  /*
+  *
+  * Small Functional Tests
+  */
+  testInsertData(): void {
+    
+    //Data needed for DB Query
+    let params = {
+      Item : {
+      "userId" : uuid(),
+      "firstName" : "Matt",
+      "lastName": "Cook",
+      },
+      TableName : 'users'
+    };
+
+    console.log(this.insertDataDB(params));
+  }
+
+  testGetData(): void {
+    console.log(this.getCookie('chessId'));
+    let params = {
+      TableName: "chessData",
+      Key: {
+          chessDataId: this.getCookie('chessId'),
+      }
+    }
+    console.log(this.getDataDB(params))
+  }
+
+
 }
