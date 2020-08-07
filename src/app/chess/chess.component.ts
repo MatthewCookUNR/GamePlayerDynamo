@@ -6,6 +6,8 @@ import { Knight } from './ChessPieceClasses/Knight';
 import { Bishop } from './ChessPieceClasses/Bishop';
 import { Queen } from './ChessPieceClasses/Queen';
 import { King } from './ChessPieceClasses/King';
+import * as AWS from 'aws-sdk';
+import { v4 as uuid } from 'uuid';
 
 @Component({
   selector: 'app-chess',
@@ -13,7 +15,9 @@ import { King } from './ChessPieceClasses/King';
   styleUrls: ['./chess.component.css']
 })
 export class ChessComponent implements OnInit {
-
+  dynamoDB: any;
+  docClient: any;
+  AWS: any = AWS;
   myChessBoard: string[][];
   possibleWhiteMovementsBoard: string[][];
   possibleBlackMovementsBoard: string[][];
@@ -30,10 +34,21 @@ export class ChessComponent implements OnInit {
   gameOver: boolean = false;
 
   constructor() {
-    this.buildPieces();
-    this.buildBoards();
-    this.buildPiecesDead();
-    this.clickedPieceIndex = -1;
+    //this.buildPieces();
+    //this.buildBoards();
+    //this.buildPiecesDead();
+    //this.clickedPieceIndex = -1;
+
+    // provide your access key and secret access key as obtained in the previous step
+    AWS.config.credentials = new AWS.Credentials('XXXXXXXXX', 'XXXXXXXXX', null);
+    AWS.config.update({
+    region: 'us-west-2'
+    });
+
+    this.dynamoDB = new AWS.DynamoDB();
+    this.docClient = new AWS.DynamoDB.DocumentClient();
+    //this.testInsertData();
+    //this.testGetData();
   }
 
   ngOnInit(): void 
@@ -42,7 +57,10 @@ export class ChessComponent implements OnInit {
   }
   
   ngAfterViewInit(): void {
-    this.newGame(); 
+    //this.newGame(); 
+    //this.newGameDB();
+    this.loadGame();
+
   }
 
   //Handles on click of square events
@@ -455,8 +473,49 @@ this.possibleWhiteMovementsBoard =
 
     //Switch Player
     this.newGame(); 
+    this.newGameDB();
     this.clickedPieceIndex = -1;
   }
+
+  loadGame(): void {
+    let chessId: string = this.getCookie('chessId');
+    if(!chessId) {
+      console.log("You have no game to load");
+      return;
+    }
+    
+    let params = {
+      TableName: "chessData",
+      Key: {
+          chessDataId: this.getCookie('chessId'),
+      }
+    }
+    let data = this.getDataDB(params)
+    console.log(data);
+    data.then((res) => {
+      this.myChessBoard = res.Item.myChessBoard;
+      this.possibleWhiteMovementsBoard = res.Item.possibleWhiteMovementsBoard;
+      this.possibleBlackMovementsBoard = res.Item.possibleBlackMovementsBoard;
+      this.myChessPieces = res.Item.myChessPieces;
+      this.clickedPieceIndex = res.Item.clickedPieceIndex;
+      this.clickedPieceId= res.Item.clickedPieceId;;
+      this.clickedPieceRow= res.Item.clickedPieceRow;;
+      this.clickedPieceCol= res.Item.clickedPieceCol;;
+      this.currentPlayerColorStr= res.Item.currentPlayerColorStr;;
+      this.blackKingCheck = res.Item.blackKingCheck;
+      this.whiteKingCheck = res.Item.blackKingCheck;
+      this.numWhitePiecesDeadList = res.Item.blackKingCheck;
+      this.numBlackPiecesDeadList = res.Item.blackKingCheck;
+      this.gameOver = res.Item.gameOver
+      console.log(this);
+  });
+  data.catch((err) => {
+      // This is never called
+      console.log("Error");
+  });
+
+  }
+
 
   /*
   *
@@ -718,5 +777,126 @@ this.possibleWhiteMovementsBoard =
     }
     document.getElementById("restartBtn").innerHTML = "Play Again?";
     document.getElementById("gameStatus").innerHTML = "Game Over";
+  }
+
+  /*
+  *
+  * Cookie Functions
+  */
+
+   //Function to set cookie with name, value, and expiration
+   setCookie(cookieName: string, value: string, expDays: number) {
+    var d = new Date();
+    d.setTime(d.getTime() + (expDays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cookieName + "=" + value + ";" + expires + ";path=/";
+  }
+
+  //Function gets cookie value by name if it exists
+  getCookie(cookieName: string) {
+    let name: string = cookieName + "=";
+    let decodedCookie: string = decodeURIComponent(document.cookie);
+    let decodedCookieArray: string[] = decodedCookie.split(';');
+    for(let i = 0; i <decodedCookieArray.length; i++) {
+      let cookie: string = decodedCookieArray[i];
+      while (cookie.charAt(0) == ' ') {
+        cookie = cookie.substring(1);
+      }
+      if (cookie.indexOf(name) == 0) {
+        return cookie.substring(name.length, cookie.length);
+      }
+    }
+    return "";
+  }
+
+  /*
+  *
+  * DynamoDB Functions
+  */
+
+  newGameDB(): void {
+    this.buildPieces();
+    this.buildBoards();
+    this.buildPiecesDead();
+    let chessId: string = this.getCookie('chessId')
+    if(!chessId) {
+      chessId = uuid();
+    }
+    this.setCookie('chessId', chessId, 7);
+
+    let stringPieces = JSON.stringify(this.myChessPieces)
+
+    let params = {
+      Item : {
+      "chessDataId" : chessId,
+      "currentPlayerColorStr" : this.currentPlayerColorStr,
+      "clickedPieceId": '',
+      "clickedPieceRow": -1,
+      "clickedPieceCol": -1,
+      "clickedPieceIndex": -1,
+      "blackKingCheck": false,
+      "whiteKingCheck": false,
+      "gameOver": false,
+      "myChessBoard":  JSON.stringify(this.myChessBoard),
+      "possibleWhiteMovementsBoard": JSON.stringify(this.possibleWhiteMovementsBoard),
+      "possibleBlackMovementsBoard": JSON.stringify(this.possibleBlackMovementsBoard),
+      "myChessPieces": stringPieces,
+      "numWhitePiecesDeadList": JSON.stringify(this.numWhitePiecesDeadList),
+      "numBlackPiecesDeadList": JSON.stringify(this.numBlackPiecesDeadList),
+      },
+      TableName : 'chessData'
+    };
+    console.log(params);
+
+    console.log(this.insertDataDB(params));
+
+  }
+  
+  testInsertData(): void {
+    let params = {
+      Item : {
+      "userId" : uuid(),
+      "firstName" : "Matt",
+      "lastName": "Cook",
+      },
+      TableName : 'users'
+    };
+
+    console.log(this.insertDataDB(params));
+  }
+
+  testGetData(): void {
+    console.log(this.getCookie('chessId'));
+    let params = {
+      TableName: "chessData",
+      Key: {
+          chessDataId: this.getCookie('chessId'),
+      }
+    }
+    console.log(this.getDataDB(params))
+  }
+
+  insertDataDB = async function (params: any) {
+    let data: any;
+    try {
+      data = await this.docClient.put(params).promise();
+    }
+    catch(err) {
+      console.log("Error inserting data in DynamoDB");
+      console.log(err);
+    }
+    return data;
+  }
+
+  getDataDB = async function(params: any) {
+    let data: any;
+    try {
+      data = await this.docClient.get(params).promise();
+    }
+    catch(err) {
+      console.log("Error getting data in DynamoDB");
+      console.log(err);
+    }
+    return data;
   }
 }
