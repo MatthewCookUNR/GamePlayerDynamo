@@ -34,13 +34,13 @@ export class ChessComponent implements OnInit {
   gameOver: boolean = false;
 
   constructor() {
-    //this.buildPieces();
+    //this.newGameBuildPieces();
     //this.buildBoards();
     //this.buildPiecesDead();
     //this.clickedPieceIndex = -1;
 
     // provide your access key and secret access key as obtained in the previous step
-    AWS.config.credentials = new AWS.Credentials('AKIASJ22AXRWM4RX7O4P', 'zwaq3gu2ljUa5e1k3GW6GCyiVXU3fovnT+1z4U9b', null);
+    AWS.config.credentials = new AWS.Credentials('AKIASJ22AXRWGQKIVT6P', 'gUEqiQMqXFgG0QtQJ9Xrarfn2juE6VgZTU3P9htm', null);
     AWS.config.update({
     region: 'us-west-2'
     });
@@ -61,6 +61,7 @@ export class ChessComponent implements OnInit {
       this.loadGame();
     }
     else {
+      this.newGame();
       this.newGameDB();
     }
 
@@ -178,7 +179,7 @@ export class ChessComponent implements OnInit {
   }
 
   //Build ChessPiece objects for game
-  buildPieces(): void  {
+  newGameBuildPieces(): void  {
 
 
     this.myChessPieces = new Array(32);
@@ -464,7 +465,7 @@ this.possibleWhiteMovementsBoard =
 
     //Back-end operations
     this.buildBoards();
-    this.buildPieces();
+    this.newGameBuildPieces();
     this.buildPiecesDead();
 
     //Front-end operations
@@ -498,14 +499,13 @@ this.possibleWhiteMovementsBoard =
       }
     }
     let data = this.getDataDB(params)
-    console.log(data);
+    this.newGameBuildPieces();
     
     //Data retrieved succesfully
     data.then((res) => {
       this.myChessBoard = JSON.parse(res.Item.myChessBoard);
       this.possibleWhiteMovementsBoard = JSON.parse(res.Item.possibleWhiteMovementsBoard);
       this.possibleBlackMovementsBoard = JSON.parse(res.Item.possibleBlackMovementsBoard);
-      this.myChessPieces = JSON.parse(res.Item.myChessPieces);
       this.clickedPieceIndex = res.Item.clickedPieceIndex;
       this.clickedPieceId= res.Item.clickedPieceId;;
       this.clickedPieceRow= res.Item.clickedPieceRow;;
@@ -516,7 +516,8 @@ this.possibleWhiteMovementsBoard =
       this.numWhitePiecesDeadList = JSON.parse(res.Item.numWhitePiecesDeadList);
       this.numBlackPiecesDeadList = JSON.parse(res.Item.numBlackPiecesDeadList);
       this.gameOver = res.Item.gameOver
-      console.log(this);
+      this.parsePieceData(JSON.parse(res.Item.myChessPieces));
+      this.switchPlayerOnScreenUI(this.currentPlayerColorStr);
       this.loadGameUI();
     });
     //If issue retrieving data
@@ -525,6 +526,38 @@ this.possibleWhiteMovementsBoard =
         console.log(err);
     });
 
+  }
+
+  //Function gets all row and columns for each chess piece from 
+  //the object containing row & col data from DB
+  parsePieceData(chessDataDB: any): void {
+    for(let i = 0; i < this.myChessPieces.length; i++) {
+      this.myChessPieces[i].row = chessDataDB.rows[i];
+      this.myChessPieces[i].column = chessDataDB.columns[i];
+    }
+  }
+
+  //Function gets all row and columns for each chess piece and 
+  //returns it in an object for sending to DB
+  getPieceRowCols(): any {
+
+    let piecesRowCols = {
+      rows: [0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0],
+
+      columns: [0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0,
+             0, 0, 0, 0, 0, 0, 0, 0],
+    };
+
+    for(let i = 0; i < this.myChessPieces.length; i++) {
+      piecesRowCols.rows[i] = this.myChessPieces[i].row;
+      piecesRowCols.columns[i] = this.myChessPieces[i].column;
+    }
+    return piecesRowCols
   }
 
 
@@ -589,6 +622,10 @@ this.possibleWhiteMovementsBoard =
         this.placePieceUI(destStr, this.myChessPieces[i].strRep); 
       }
     }
+  }
+
+  setCurrentPlayer(color: string): void {
+
   }
 
   //Cleans board so that pieces can be placed from database
@@ -855,7 +892,7 @@ this.possibleWhiteMovementsBoard =
   */
 
   newGameDB(): void {
-    this.buildPieces();
+    this.newGameBuildPieces();
     this.buildBoards();
     this.buildPiecesDead();
     let chessId: string = this.getCookie('chessId')
@@ -863,8 +900,8 @@ this.possibleWhiteMovementsBoard =
       chessId = uuid();
     }
     this.setCookie('chessId', chessId, 7);
-
-    let stringPieces = JSON.stringify(this.myChessPieces)
+    
+    let pieceDataOut = this.getPieceRowCols(); 
 
     //Data needed for DB Query
     let params = {
@@ -881,7 +918,7 @@ this.possibleWhiteMovementsBoard =
       "myChessBoard":  JSON.stringify(this.myChessBoard),
       "possibleWhiteMovementsBoard": JSON.stringify(this.possibleWhiteMovementsBoard),
       "possibleBlackMovementsBoard": JSON.stringify(this.possibleBlackMovementsBoard),
-      "myChessPieces": stringPieces,
+      "myChessPieces": JSON.stringify(pieceDataOut),
       "numWhitePiecesDeadList": JSON.stringify(this.numWhitePiecesDeadList),
       "numBlackPiecesDeadList": JSON.stringify(this.numBlackPiecesDeadList),
       },
@@ -922,7 +959,7 @@ this.possibleWhiteMovementsBoard =
   * Small Functional Tests
   */
   testInsertData(): void {
-    
+
     //Data needed for DB Query
     let params = {
       Item : {
